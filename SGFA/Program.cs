@@ -14,11 +14,11 @@ namespace SGFA
         static void Main(string[] args)
         {
             // Criar dois carros para testes
-            Veiculo v1 = new Veiculo("AA-11-AA", 50);
+            Veiculo v1 = new Veiculo("AA-11-AA", 80);
             v1.ReservaAtingida += TratarAlertaReserva;
             frota.Add(v1);
 
-            Veiculo v2 = new Veiculo("BB-22-BB", 60);
+            Veiculo v2 = new Veiculo("BB-22-BB", 150);
             v2.ReservaAtingida += TratarAlertaReserva;
             frota.Add(v2);
 
@@ -73,7 +73,7 @@ namespace SGFA
                 }
                 else
                 {
-                    Console.WriteLine("Por favor introduza um número.");
+                    Console.WriteLine("Por favor introduza um número!");
                     Pausar();
                 }
 
@@ -87,8 +87,8 @@ namespace SGFA
             if (v != null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n [ALERTA DE RESERVA] O veículo {v.Matricula} entrou na reserva!");
-                Console.WriteLine($"   Combustível atual: {v.NivelCombustivel:F2}L (Menos de 10% da capacidade total de {v.CapacidadeDeposito}L)");
+                Console.WriteLine($"\n[ALERTA DE RESERVA] O veículo {v.Matricula} entrou na reserva!");
+                Console.WriteLine($"Combustível atual: {v.NivelCombustivel:F2}L (Menos de 10% da capacidade total de {v.CapacidadeDeposito}L)");
                 Console.ResetColor();
             }
         }
@@ -123,11 +123,11 @@ namespace SGFA
                 Veiculo v = new Veiculo(mat, cap);
                 v.ReservaAtingida += TratarAlertaReserva;
                 frota.Add(v);
-                Console.WriteLine(" Veículo guardado com sucesso!");
+                Console.WriteLine("Veículo guardado com sucesso!");
             }
             else
             {
-                Console.WriteLine(" Capacidade inválida.");
+                Console.WriteLine("Capacidade inválida.");
             }
         }
 

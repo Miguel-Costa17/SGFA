@@ -1,52 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SGFA
 {
     public class Veiculo
     {
-        // -------------------------------------------------------------
-        // A. CAMPOS PRIVADOS (Guardam a informação em segurança)
-        // -------------------------------------------------------------
+        // Atributos privados
         private int _quilometragem;
         private double _nivelCombustivel;
+        private bool _avisoReservaDisparado = false;
 
-        // -------------------------------------------------------------
-        // E. EVENTO (Avisa quando o combustível está no fim)
-        // -------------------------------------------------------------
+        // Evento de reserva
         public event EventHandler ReservaAtingida;
 
-        // -------------------------------------------------------------
-        // PROPRIEDADES PÚBLICAS
-        // -------------------------------------------------------------
-
-        // Propriedades automáticas simples
+        // Propriedades públicas
         public string Matricula { get; set; }
         public int CapacidadeDeposito { get; set; }
 
-        // C. Quilometragem: Validação para nunca diminuir
         public int Quilometragem
         {
             get { return _quilometragem; }
             set
             {
-                if (value < _quilometragem)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Erro: A quilometragem não pode diminuir!");
-                    Console.ResetColor();
-                }
-                else
+                if (value >= _quilometragem)
                 {
                     _quilometragem = value;
                 }
             }
         }
 
-        // C. Nível de Combustível: Validação e Evento de Reserva
         public double NivelCombustivel
         {
             get { return _nivelCombustivel; }
@@ -65,56 +46,46 @@ namespace SGFA
                     _nivelCombustivel = value;
                 }
 
-                // E. Se estiver abaixo de 10%, dispara o evento
+                // Cálculo do limite dos 10%
                 double limiteReserva = CapacidadeDeposito * 0.10;
-                if (_nivelCombustivel < limiteReserva)
+
+                if (_nivelCombustivel >= limiteReserva)
                 {
-                    ReservaAtingida?.Invoke(this, EventArgs.Empty);
+                    _avisoReservaDisparado = false;
+                }
+                else if (_nivelCombustivel < limiteReserva && !_avisoReservaDisparado)
+                {
+                    _avisoReservaDisparado = true;
+                    if (ReservaAtingida != null)
+                    {
+                        ReservaAtingida(this, EventArgs.Empty);
+                    }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // B. CONSTRUTOR SEGURO
-        // -------------------------------------------------------------
+        // Construtor
         public Veiculo(string matricula, int capacidadeDeposito)
         {
             Matricula = matricula;
-            CapacidadeDeposito = capacidadeDeposito; _quilometragem = 0; // Começa a 0 km
-            _nivelCombustivel = capacidadeDeposito; // Começa com depósito cheio
+            CapacidadeDeposito = capacidadeDeposito;
+            _quilometragem = 0;
+            _nivelCombustivel = capacidadeDeposito;
         }
 
-        // -------------------------------------------------------------
-        // D. MÉTODOS (Ações do veículo)
-        // -------------------------------------------------------------
-
-        // Abastecer o veículo
+        // Métodos
         public void Abastecer(double litros)
         {
-            if (litros <= 0)
+            if (litros > 0)
             {
-                Console.WriteLine("Aviso: Insira uma quantidade superior a 0 litros.");
-                return;
-            }
-
-            if (_nivelCombustivel + litros > CapacidadeDeposito)
-            {
-                Console.WriteLine($" Aviso: Ultrapassou o limite! Depósito atestado no máximo ({CapacidadeDeposito}L).");
-                NivelCombustivel = CapacidadeDeposito;
-            }
-            else
-            {
-                NivelCombustivel += litros;
-                Console.WriteLine($"[SUCESSO] Abastecidos {litros}L com sucesso.");
+                NivelCombustivel = NivelCombustivel + litros;
             }
         }
 
-        // Realizar viagem (0.07L por km)
         public bool RealizarViagem(int kmDistancia)
         {
             if (kmDistancia <= 0)
             {
-                Console.WriteLine("A distância da viagem tem de ser maior que 0.");
                 return false;
             }
 
@@ -122,21 +93,13 @@ namespace SGFA
 
             if (_nivelCombustivel >= combustivelNecessario)
             {
-                Quilometragem += kmDistancia;
-                NivelCombustivel -= combustivelNecessario;
-                Console.WriteLine($"[VIAGEM OK] Viagem de {kmDistancia} km feita! Consumo: {combustivelNecessario:F2}L.");
+                Quilometragem = Quilometragem + kmDistancia;
+                NivelCombustivel = NivelCombustivel - combustivelNecessario;
                 return true;
             }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[RECUSADO] Sem combustível suficiente para {kmDistancia} km.");
-                Console.WriteLine($"Necessário: {combustivelNecessario:F2}L | Disponível: {_nivelCombustivel:F2}L.");
-                Console.ResetColor();
-                return false;
-            }
+
+            return false;
         }
     }
 }
-    
 

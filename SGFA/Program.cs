@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SGFA
 {
     internal class Program
     {
-        // Lista para guardar todos os veículos da empresa
+        // Lista global para guardar a frota de veículos
         static List<Veiculo> frota = new List<Veiculo>();
 
         static void Main(string[] args)
         {
-            // Criar dois carros para testes
+            // Criar dois carros de teste iniciais
             Veiculo v1 = new Veiculo("AA-11-AA", 80);
             v1.ReservaAtingida += TratarAlertaReserva;
             frota.Add(v1);
@@ -90,10 +87,10 @@ namespace SGFA
             } while (opcao != 0);
         }
 
-        // Evento: Mostra o aviso em VERMELHO na consola
+        // Resposta ao evento de reserva
         private static void TratarAlertaReserva(object sender, EventArgs e)
         {
-            Veiculo v = sender as Veiculo;
+            Veiculo v = (Veiculo)sender;
             if (v != null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -118,7 +115,7 @@ namespace SGFA
             for (int i = 0; i < frota.Count; i++)
             {
                 Veiculo v = frota[i];
-                Console.WriteLine($"[{i + 1}] Matrícula: {v.Matricula} | Depósito Max: {v.CapacidadeDeposito}L | Nível Atual: {v.NivelCombustivel:F2}L | Total Km: {v.Quilometragem} km");
+                Console.WriteLine($"Matrícula: {v.Matricula} | Depósito Max: {v.CapacidadeDeposito}L | Nível Atual: {v.NivelCombustivel:F2}L | Total Km: {v.Quilometragem} km");
             }
         }
 
@@ -127,7 +124,7 @@ namespace SGFA
             Console.Write("Matrícula (ex: 00-AA-00): ");
             string mat = Console.ReadLine();
 
-            // Verificar se a matrícula já existe na lista
+            // Validação de duplicados
             for (int i = 0; i < frota.Count; i++)
             {
                 if (frota[i].Matricula.ToUpper() == mat.ToUpper())
@@ -145,7 +142,9 @@ namespace SGFA
                 Veiculo v = new Veiculo(mat, cap);
                 v.ReservaAtingida += TratarAlertaReserva;
                 frota.Add(v);
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Veículo guardado com sucesso!");
+                Console.ResetColor();
             }
             else
             {
@@ -161,7 +160,6 @@ namespace SGFA
             Console.Write("\nIntroduza a matrícula do veículo a remover: ");
             string mat = Console.ReadLine();
 
-            // Procurar o veículo na lista pela matrícula
             for (int i = 0; i < frota.Count; i++)
             {
                 if (frota[i].Matricula.ToUpper() == mat.ToUpper())
@@ -174,7 +172,6 @@ namespace SGFA
                 }
             }
 
-            // Se o ciclo terminar e não encontrar a matrícula
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Erro: Nenhum veículo encontrado com essa matrícula.");
             Console.ResetColor();
@@ -191,7 +188,6 @@ namespace SGFA
             Console.Write("Introduza a matrícula a pesquisar: ");
             string mat = Console.ReadLine();
 
-            // Percorre a lista à procura da matrícula
             for (int i = 0; i < frota.Count; i++)
             {
                 if (frota[i].Matricula.ToUpper() == mat.ToUpper())
@@ -208,42 +204,79 @@ namespace SGFA
                 }
             }
 
-            // Se percorrer a lista toda e não encontrar
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Erro: Nenhum veículo encontrado com essa matrícula.");
             Console.ResetColor();
         }
 
+        // ALTERADO: Procura pela Matrícula em vez do número do índice
         static void MenuViagem()
         {
             ListarFrota();
             if (frota.Count == 0) return;
 
-            Console.Write("\nEscolha o número do veículo para a viagem: ");
-            if (int.TryParse(Console.ReadLine(), out int idx) && idx >= 1 && idx <= frota.Count)
+            Console.Write("\nIntroduza a matrícula do veículo para a viagem: ");
+            string mat = Console.ReadLine();
+
+            for (int i = 0; i < frota.Count; i++)
             {
-                Console.Write("Distância a percorrer em km: ");
-                if (int.TryParse(Console.ReadLine(), out int km))
+                if (frota[i].Matricula.ToUpper() == mat.ToUpper())
                 {
-                    frota[idx - 1].RealizarViagem(km);
+                    Console.Write("Distância a percorrer em km: ");
+                    if (int.TryParse(Console.ReadLine(), out int km))
+                    {
+                        bool sucesso = frota[i].RealizarViagem(km);
+
+                        if (sucesso)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"\n[SUCESSO] Viagem realizada! Foram somados {km} km ao total.");
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("\n[ERRO] Combustível insuficiente para realizar a viagem!");
+                            Console.ResetColor();
+                        }
+                    }
+                    return;
                 }
             }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Erro: Nenhum veículo encontrado com essa matrícula.");
+            Console.ResetColor();
         }
 
+        // ALTERADO: Procura pela Matrícula em vez do número do índice
         static void MenuAbastecer()
         {
             ListarFrota();
             if (frota.Count == 0) return;
 
-            Console.Write("\nEscolha o número do veículo a abastecer: ");
-            if (int.TryParse(Console.ReadLine(), out int idx) && idx >= 1 && idx <= frota.Count)
+            Console.Write("\nIntroduza a matrícula do veículo a abastecer: ");
+            string mat = Console.ReadLine();
+
+            for (int i = 0; i < frota.Count; i++)
             {
-                Console.Write("Litros a abastecer: ");
-                if (double.TryParse(Console.ReadLine(), out double litros))
+                if (frota[i].Matricula.ToUpper() == mat.ToUpper())
                 {
-                    frota[idx - 1].Abastecer(litros);
+                    Console.Write("Litros a abastecer: ");
+                    if (double.TryParse(Console.ReadLine(), out double litros))
+                    {
+                        frota[i].Abastecer(litros);
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"\n[SUCESSO] Abastecimento concluído.");
+                        Console.ResetColor();
+                    }
+                    return;
                 }
             }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Erro: Nenhum veículo encontrado com essa matrícula.");
+            Console.ResetColor();
         }
 
         static void Pausar()

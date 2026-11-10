@@ -5,14 +5,14 @@ namespace SGFA
 {
     internal class Program
     {
-        // Lista global para guardar a frota de veículos
+        // Lista global para guardar a frota de carros em memória
         static List<Veiculo> frota = new List<Veiculo>();
 
         static void Main(string[] args)
         {
-            // Criar dois carros de teste iniciais
+            // Criar dois carros para testes e associar o evento da reserva
             Veiculo v1 = new Veiculo("AA-11-AA", 80);
-            v1.ReservaAtingida += TratarAlertaReserva;
+            v1.ReservaAtingida += TratarAlertaReserva; // Liga o evento ao método de aviso
             frota.Add(v1);
 
             Veiculo v2 = new Veiculo("BB-22-BB", 150);
@@ -21,6 +21,7 @@ namespace SGFA
 
             int opcao = -1;
 
+            // Ciclo do-while para manter o menu a correr até escolher 0
             do
             {
                 Console.Clear();
@@ -40,9 +41,11 @@ namespace SGFA
                 Console.WriteLine("--------------------------------------------------");
                 Console.Write("Escolha uma opção: ");
 
+                // int.TryParse para evitar que o programa vá abaixo se escreverem letras
                 if (int.TryParse(Console.ReadLine(), out opcao))
                 {
                     Console.WriteLine();
+                    // Switch-case para tratar a opção escolhida no menu
                     switch (opcao)
                     {
                         case 1:
@@ -87,12 +90,14 @@ namespace SGFA
             } while (opcao != 0);
         }
 
-        // Resposta ao evento de reserva
+        // Função que é executada quando a classe Veiculo dispara o evento de reserva
         private static void TratarAlertaReserva(object sender, EventArgs e)
         {
+            // Converte o sender para saber qual foi o veículo que entrou na reserva
             Veiculo v = (Veiculo)sender;
             if (v != null)
             {
+                // Escreve o aviso a vermelho
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\n[ALERTA DE RESERVA] O veículo {v.Matricula} entrou na reserva!");
                 Console.WriteLine($"Combustível atual: {v.NivelCombustivel:F2}L (Menos de 10% da capacidade total de {v.CapacidadeDeposito}L)");
@@ -100,6 +105,7 @@ namespace SGFA
             }
         }
 
+        // Percorre a lista 'frota' com um ciclo for e mostra os veículos
         static void ListarFrota()
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -119,12 +125,13 @@ namespace SGFA
             }
         }
 
+        // Adiciona um veículo novo e verifica se a matrícula já existe
         static void AdicionarVeiculo()
         {
             Console.Write("Matrícula (ex: 00-AA-00): ");
             string mat = Console.ReadLine();
 
-            // Validação de duplicados
+            // Percorre a lista para verificar matrículas repetidas
             for (int i = 0; i < frota.Count; i++)
             {
                 if (frota[i].Matricula.ToUpper() == mat.ToUpper())
@@ -140,7 +147,7 @@ namespace SGFA
             if (int.TryParse(Console.ReadLine(), out int cap) && cap > 0)
             {
                 Veiculo v = new Veiculo(mat, cap);
-                v.ReservaAtingida += TratarAlertaReserva;
+                v.ReservaAtingida += TratarAlertaReserva; // Associa o evento ao novo veículo
                 frota.Add(v);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Veículo guardado com sucesso!");
@@ -152,6 +159,7 @@ namespace SGFA
             }
         }
 
+        // Procura a matrícula e apaga o veículo da lista
         static void RemoverVeiculo()
         {
             ListarFrota();
@@ -164,7 +172,7 @@ namespace SGFA
             {
                 if (frota[i].Matricula.ToUpper() == mat.ToUpper())
                 {
-                    frota.RemoveAt(i);
+                    frota.RemoveAt(i); // Remove a posição da lista
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"[SUCESSO] Veículo com a matrícula {mat.ToUpper()} removido da frota!");
                     Console.ResetColor();
@@ -177,6 +185,7 @@ namespace SGFA
             Console.ResetColor();
         }
 
+        // Procura o veículo por matrícula e mostra as suas informações
         static void ConsultarVeiculo()
         {
             if (frota.Count == 0)
@@ -209,7 +218,7 @@ namespace SGFA
             Console.ResetColor();
         }
 
-        // ALTERADO: Procura pela Matrícula em vez do número do índice
+        // Pede a matrícula e os km para chamar o método RealizarViagem
         static void MenuViagem()
         {
             ListarFrota();
@@ -220,11 +229,13 @@ namespace SGFA
 
             for (int i = 0; i < frota.Count; i++)
             {
+                // ToUpper() permite ler matrículas em minúsculas ou maiúsculas
                 if (frota[i].Matricula.ToUpper() == mat.ToUpper())
                 {
                     Console.Write("Distância a percorrer em km: ");
                     if (int.TryParse(Console.ReadLine(), out int km))
                     {
+                        // Executa a viagem no objeto
                         bool sucesso = frota[i].RealizarViagem(km);
 
                         if (sucesso)
@@ -249,7 +260,7 @@ namespace SGFA
             Console.ResetColor();
         }
 
-        // ALTERADO: Procura pela Matrícula em vez do número do índice
+        // Pede a matrícula e os litros para abastecer o veículo
         static void MenuAbastecer()
         {
             ListarFrota();
@@ -279,6 +290,7 @@ namespace SGFA
             Console.ResetColor();
         }
 
+        // Pausa a consola até carregar numa tecla
         static void Pausar()
         {
             Console.WriteLine("\nPressione qualquer tecla para continuar...");
@@ -286,6 +298,5 @@ namespace SGFA
         }
     }
 }
-
 
 
